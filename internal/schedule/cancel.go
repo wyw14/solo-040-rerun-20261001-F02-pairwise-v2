@@ -29,9 +29,7 @@ func (p *Planner) Cancel(ctx context.Context, planID uuid.UUID, note string, pub
 		p.admission.Restore(plan.ChamberID, removed)
 		return Cancellation{}, errors.Join(errors.New("signal compensation failed"), err)
 	}
-	for index := range removed {
-		removed[index].Released = false
-	}
+	// Re-queue the convoy's vessels; they resume from standby in FIFO order.
 	p.admission.Restore(plan.ChamberID, removed)
 	plan.Cancelled = true
 	plan.CancelNote = note

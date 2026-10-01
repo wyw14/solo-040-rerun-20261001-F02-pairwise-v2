@@ -23,6 +23,13 @@ func closeGateHandler(runtime *Runtime) http.HandlerFunc {
 			writeError(w, http.StatusConflict, errors.New("active transit not found"))
 			return
 		}
+		// Gate the seal command itself: while vessels are still entering, the
+		// entry gate cannot be closed. The cycle coordinator re-checks this on
+		// acknowledgement as the authoritative guard.
+		if cycleValue.Stage == model.StageAdmitting && !runtime.CycleService.PlanEntryComplete(chamberID) {
+			writeError(w, http.StatusConflict, errors.New("cannot close entry gate: not every vessel in the plan has completed lock entry"))
+			return
+		}
 		command, err := runtime.Interlocks.RequestClose(r.Context(), cycleValue, direction)
 		if err != nil {
 			writeError(w, http.StatusConflict, err)

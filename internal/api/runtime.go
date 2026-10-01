@@ -65,6 +65,7 @@ func NewRuntime(ctx context.Context, dataDirectory string) (*Runtime, error) {
 	admissionController := admission.NewController(admissionQueue, gateState, signalStore, now)
 	admissionService := admission.NewService(admissionController, recorder, now)
 	leaseRegistry := lease.NewRegistry()
+	admissionController.BindContact(leaseRegistry)
 	leaseService := lease.NewService(leaseRegistry, admissionController, recorder, now)
 	leaseSweeper := lease.NewSweeper(leaseRegistry, now)
 	planner := schedule.NewPlanner(admissionService, recorder, now)
@@ -87,7 +88,7 @@ func NewRuntime(ctx context.Context, dataDirectory string) (*Runtime, error) {
 		interlock.DefaultPolicy(), interlock.NewArbiter(), gateController,
 		levelByChamber, emergencyActive,
 	)
-	cycleCoordinator := cycle.NewCoordinator(gateController, hydraulicsController, recorder, now)
+	cycleCoordinator := cycle.NewCoordinator(gateController, hydraulicsController, admissionService, recorder, now)
 	cycleService := cycle.NewService(cycleCoordinator, admissionService)
 	safetyCoordinator = safety.NewCoordinator(gateCommands, barrier, recorder, now)
 	safetyService := safety.NewService(safetyCoordinator, cycleCoordinator)

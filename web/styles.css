@@ -43,8 +43,28 @@ button {
   min-height: 38px; padding: 8px 14px; font: inherit; cursor: pointer;
 }
 button:hover { background: #27878a; }
+button.secondary { border-color: #5a6b75; background: #2a353d; }
+button.secondary:hover { background: #37454e; }
 button.danger { border-color: #ef6f6c; background: #8f3434; }
 button:disabled { opacity: .55; cursor: wait; }
+.row-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.row-actions button { min-height: 32px; padding: 5px 10px; font-size: 12px; }
+.badge {
+  display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px;
+  font-weight: 600; border: 1px solid transparent; white-space: nowrap;
+}
+.badge-muted { background: #2a353d; color: #b9c4ca; border-color: #465761; }
+.badge-info { background: #14484d; color: #8fe3e1; border-color: #2c7a7d; }
+.badge-ok { background: #1e4632; color: #9fe6bd; border-color: #2f7d54; }
+.badge-warn { background: #4a3d1c; color: #f2d488; border-color: #8a7134; }
+.badge-danger { background: #5a2626; color: #ffb3b0; border-color: #a14c4c; }
+.banner { margin: 0 0 14px; padding: 10px 12px; border-radius: 4px; font-size: 13px; border: 1px solid; }
+.banner-warn { background: #3a2f17; border-color: #8a7134; color: #f2d488; }
+.banner-ok { background: #163526; border-color: #2f7d54; color: #9fe6bd; }
+.console { border: 1px solid #2c3941; border-radius: 6px; padding: 14px; margin-bottom: 16px; background: #12191f; }
+.console h3 { margin: 0 0 12px; font-size: 15px; }
+.convoy { margin-bottom: 14px; }
+.convoy-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th, td { text-align: left; border-bottom: 1px solid #2c3941; padding: 10px 8px; vertical-align: top; }
 th { color: #91a0a8; font-weight: 600; }

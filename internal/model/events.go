@@ -19,6 +19,7 @@ const (
 	EventCommandSettled   EventType = "command.settled"
 	EventSignalChanged    EventType = "signal.changed"
 	EventLeaseChanged     EventType = "lease.changed"
+	EventAdmissionUpdated EventType = "admission.updated"
 	EventEmergencyStarted EventType = "emergency.started"
 	EventEmergencySettled EventType = "emergency.settled"
 	EventReplayWarning    EventType = "replay.warning"

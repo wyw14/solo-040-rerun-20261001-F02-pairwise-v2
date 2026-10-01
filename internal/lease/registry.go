@@ -67,6 +67,14 @@ func (r *Registry) Get(vesselID uuid.UUID) (model.Lease, bool) {
 	return lease, ok
 }
 
+// LostContact reports whether the vessel had a lease that has now expired.
+func (r *Registry) LostContact(vesselID uuid.UUID, now time.Time) bool {
+	r.mu.RLock()
+	lease, ok := r.leases[vesselID]
+	r.mu.RUnlock()
+	return ok && !lease.Active(now)
+}
+
 func (r *Registry) Release(vesselID uuid.UUID, owner string, token uint64) bool {
 	r.mu.Lock()
 	defer r.mu.Unlock()

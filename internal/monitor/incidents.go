@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/wyw14/cry-96/internal/admission"
 	"github.com/wyw14/cry-96/internal/journal"
 	"github.com/wyw14/cry-96/internal/model"
 )
@@ -39,7 +40,7 @@ func (r *IncidentReview) List(ctx context.Context) ([]Incident, error) {
 			return nil, err
 		}
 		for _, event := range events {
-			severity, summary, include := incidentMeaning(event.Type)
+			severity, summary, include := incidentMeaning(event)
 			if !include {
 				continue
 			}
@@ -54,8 +55,8 @@ func (r *IncidentReview) List(ctx context.Context) ([]Incident, error) {
 	return result, nil
 }
 
-func incidentMeaning(kind model.EventType) (string, string, bool) {
-	switch kind {
+func incidentMeaning(event model.Event) (string, string, bool) {
+	switch event.Type {
 	case model.EventEmergencyStarted:
 		return "critical", "Emergency stop requested", true
 	case model.EventEmergencySettled:
@@ -64,6 +65,12 @@ func incidentMeaning(kind model.EventType) (string, string, bool) {
 		return "warning", "Recovery sequence requires review", true
 	case model.EventPlanCancelled:
 		return "notice", "Convoy plan cancelled and compensated", true
+	case model.EventAdmissionUpdated:
+		var update admission.Update
+		if err := event.Decode(&update); err == nil && update.Entry.Status == admission.StatusFailed {
+			return "critical", "Vessel failed or lost contact; convoy entry blocked", true
+		}
+		return "", "", false
 	default:
 		return "", "", false
 	}

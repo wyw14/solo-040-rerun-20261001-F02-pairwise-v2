@@ -13,6 +13,11 @@ import (
 	"github.com/wyw14/cry-96/internal/model"
 )
 
+// AdmissionGate reports whether the active plan's vessels all completed entry.
+type AdmissionGate interface {
+	PlanEntryComplete(cycle model.TransitCycle) bool
+}
+
 // Coordinator is the authoritative owner of active transit generations.
 type Coordinator struct {
 	mu          sync.RWMutex
@@ -20,17 +25,19 @@ type Coordinator struct {
 	generations map[string]uint64
 	gates       *gate.Controller
 	hydraulics  *hydraulics.Controller
+	admission   AdmissionGate
 	recorder    *journal.Recorder
 	now         func() time.Time
 }
 
-func NewCoordinator(gates *gate.Controller, hydraulicsController *hydraulics.Controller, recorder *journal.Recorder, now func() time.Time) *Coordinator {
+func NewCoordinator(gates *gate.Controller, hydraulicsController *hydraulics.Controller, admissionGate AdmissionGate, recorder *journal.Recorder, now func() time.Time) *Coordinator {
 	if now == nil {
 		now = time.Now
 	}
 	return &Coordinator{
 		current: make(map[string]model.TransitCycle), generations: make(map[string]uint64),
-		gates: gates, hydraulics: hydraulicsController, recorder: recorder, now: now,
+		gates: gates, hydraulics: hydraulicsController, admission: admissionGate,
+		recorder: recorder, now: now,
 	}
 }
 
@@ -62,6 +69,15 @@ func (c *Coordinator) Current(chamberID string) (model.TransitCycle, bool) {
 	return cycleValue.Clone(), ok
 }
 
+// admissionComplete guards the admitting → sealed transition: the chamber may
+// only be sealed once every vessel in the current plan has finished entering.
+func (c *Coordinator) admissionComplete(cycleValue model.TransitCycle) bool {
+	if c.admission == nil {
+		return true
+	}
+	return c.admission.PlanEntryComplete(cycleValue)
+}
+
 func (c *Coordinator) Cancel(ctx context.Context, chamberID, reason string) (model.TransitCycle, error) {
 	c.mu.Lock()
 	cycleValue, ok := c.current[chamberID]
@@ -91,6 +107,9 @@ func (c *Coordinator) ApplyGateAck(ctx context.Context, ack model.DeviceAck) err
 		return errors.New("device acknowledgement belongs to an inactive transit generation")
 	}
 	next, err := nextAfterGate(cycleValue.Stage)
+	if err == nil && next == model.StageSealed && !c.admissionComplete(cycleValue) {
+		err = errors.New("cannot seal chamber: not every vessel in the plan has completed lock entry")
+	}
 	if err == nil {
 		err = cycleValue.Advance(next, "matching gate command settled", c.now())
 	}
