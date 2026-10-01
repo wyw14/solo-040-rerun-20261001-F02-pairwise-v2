@@ -31,7 +31,13 @@ func (s *Service) Publish(ctx context.Context, planID uuid.UUID, cycle model.Tra
 	if plan.ChamberID != cycle.ChamberID || plan.ID != cycle.PlanID {
 		return signal.Publication{}, errors.New("plan and transit do not match")
 	}
-	return s.publisher.Publish(ctx, cycle, plan.Vessels, model.SignalProceed)
+	// Only the single vessel at the queue head may receive a proceed aspect;
+	// vessels behind it must stay on stop until the head resolves.
+	head, ok := s.planner.HeadVessel(plan)
+	if !ok {
+		return signal.Publication{}, errors.New("convoy is not at the chamber queue head")
+	}
+	return s.publisher.Publish(ctx, cycle, []model.Vessel{head}, model.SignalProceed)
 }
 
 func (s *Service) Cancel(ctx context.Context, planID uuid.UUID, note string, publication signal.Publication) (Cancellation, error) {

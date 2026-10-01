@@ -53,6 +53,28 @@ th { color: #91a0a8; font-weight: 600; }
 .status.warning::before { background: #f2c14e; }
 .status.critical::before { background: #ef6f6c; }
 .message { min-height: 22px; color: #f2c14e; font-size: 13px; margin-top: 10px; white-space: pre-wrap; }
+.badge {
+  display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px;
+  font-weight: 600; border: 1px solid #465761; color: #c3ced4; white-space: nowrap;
+}
+.badge.waiting { background: #232e36; color: #aab7be; }
+.badge.admitted { background: #4a3f17; border-color: #f2c14e; color: #f5d678; }
+.badge.entered { background: #1d4034; border-color: #46b387; color: #7fe0b6; }
+.badge.withdrawn { background: #2a2f33; color: #7c8890; }
+.badge.failed { background: #4d2020; border-color: #ef6f6c; color: #ff9b98; }
+.progress-track { height: 6px; background: #232e36; border-radius: 999px; overflow: hidden; margin-top: 6px; }
+.progress-fill { height: 100%; background: #5bc0be; }
+.progress-fill.blocked { background: #ef6f6c; }
+.row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.row-actions button { min-height: 30px; padding: 4px 10px; font-size: 12px; }
+.vessel-row { position: relative; }
+.vessel-row .remove-vessel {
+  position: absolute; right: -6px; top: -6px; min-height: 22px; height: 22px; width: 22px;
+  padding: 0; border-radius: 50%; border-color: #ef6f6c; background: #8f3434; line-height: 1;
+}
+.plan-block { border: 1px solid #2c3941; border-radius: 6px; padding: 12px; margin-bottom: 12px; }
+.plan-block:last-child { margin-bottom: 0; }
+.plan-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
 @media (max-width: 780px) {
   header { height: auto; padding: 14px 18px; align-items: flex-start; flex-direction: column; gap: 10px; }
   main { padding: 20px 16px 40px; }

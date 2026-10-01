@@ -30,7 +30,10 @@ func (p *Planner) Cancel(ctx context.Context, planID uuid.UUID, note string, pub
 		return Cancellation{}, errors.Join(errors.New("signal compensation failed"), err)
 	}
 	for index := range removed {
-		removed[index].Released = false
+		removed[index].State = model.AdmissionWaiting
+		removed[index].AdmittedAt = nil
+		removed[index].EnteredAt = nil
+		removed[index].ResolvedAt = nil
 	}
 	p.admission.Restore(plan.ChamberID, removed)
 	plan.Cancelled = true

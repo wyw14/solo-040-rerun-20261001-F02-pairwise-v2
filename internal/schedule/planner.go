@@ -86,3 +86,13 @@ func (p *Planner) require(planID uuid.UUID) (model.ConvoyPlan, error) {
 	}
 	return plan, nil
 }
+
+// HeadVessel returns the single vessel that currently owns the admission
+// cursor for the plan's chamber, or false when the convoy is not at the head.
+func (p *Planner) HeadVessel(plan model.ConvoyPlan) (model.Vessel, bool) {
+	entry, ok := p.admission.Head(plan.ChamberID)
+	if !ok || entry.PlanID != plan.ID {
+		return model.Vessel{}, false
+	}
+	return entry.Vessel, true
+}
